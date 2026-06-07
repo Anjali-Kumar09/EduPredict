@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Admin Analytics | EduPredict{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">📊 System Analytics</h2>
+            <p class="text-muted">Overview of student performance and system metrics</p>
+        </div>
+        <div>
+            <span class="badge bg-primary p-2 px-3 rounded-pill">
+                <i class="fas fa-calendar-alt"></i> {{ now|date:"F j, Y" }}
+            </span>
+        </div>
+    </div>
+
+    <!-- KPI Cards Row -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card text-center">
+                <i class="fas fa-user-graduate fa-2x mb-2" style="color: #567C8D;"></i>
+                <h3 class="mb-0">{{ total_students }}</h3>
+                <p class="text-muted mb-0">Total Students</p>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card text-center">
+                <i class="fas fa-chart-line fa-2x mb-2" style="color: #567C8D;"></i>
+                <h3 class="mb-0">{{ avg_cgpa }}</h3>
+                <p class="text-muted mb-0">Average CGPA</p>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card text-center">
+                <i class="fas fa-file-alt fa-2x mb-2" style="color: #567C8D;"></i>
+                <h3 class="mb-0">{{ total_grades }}</h3>
+                <p class="text-muted mb-0">Total Grades Recorded</p>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card text-center">
+                <i class="fas fa-percent fa-2x mb-2" style="color: #567C8D;"></i>
+                <h3 class="mb-0">{{ avg_marks }}%</h3>
+                <p class="text-muted mb-0">Average Marks</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="dashboard-card h-100">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-2"></i> Risk Distribution
+                </div>
+                <div class="card-body">
+                    <canvas id="riskChart" height="250"></canvas>
+                    <div class="mt-3 text-center small text-muted">
+                        <span class="badge bg-success me-2">Low Risk (CGPA ≥ 8)</span>
+                        <span class="badge bg-warning me-2">Medium Risk (5-7.9)</span>
+                        <span class="badge bg-danger">High Risk (<5)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="dashboard-card h-100">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-2"></i> Students by Semester
+                </div>
+                <div class="card-body">
+                    <canvas id="semesterChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Metrics Row (optional – shows grade distribution if enough data) -->
+    {% if total_grades > 0 %}
+    <div class="row">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <i class="fas fa-chart-simple me-2"></i> Grade Distribution
+                </div>
+                <div class="card-body">
+                    <canvas id="gradeDistributionChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Risk Distribution Pie Chart
+    const riskCtx = document.getElementById('riskChart').getContext('2d');
+    new Chart(riskCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Low Risk (CGPA ≥ 8)', 'Medium Risk (5-7.9)', 'High Risk (<5)'],
+            datasets: [{
+                data: [{{ low_risk }}, {{ medium_risk }}, {{ high_risk }}],
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 12 } } },
+                tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw} student(s)` } }
+            }
+        }
+    });
+
+    // Semester Bar Chart
+    const semCtx = document.getElementById('semesterChart').getContext('2d');
+    const semesterLabels = [{% for item in semester_counts %}"Sem {{ item.semester }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const semesterData = [{% for item in semester_counts %}{{ item.count }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    new Chart(semCtx, {
+        type: 'bar',
+        data: {
+            labels: semesterLabels,
+            datasets: [{
+                label: 'Number of Students',
+                data: semesterData,
+                backgroundColor: '#567C8D',
+                borderRadius: 8,
+                barPercentage: 0.7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+            plugins: { legend: { position: 'top' } }
+        }
+    });
+
+    {% if total_grades > 0 %}
+    // Grade Distribution Bar Chart (average grade per exam type – simple aggregation)
+    // We'll create a dummy data set based on existing grades if available.
+    // For real implementation, you would pass grade distribution data from the view.
+    // Here we'll assume you have grades and compute a simple distribution.
+    const gradeCtx = document.getElementById('gradeDistributionChart').getContext('2d');
+    new Chart(gradeCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Below 40%', '40-59%', '60-79%', '80-100%'],
+            datasets: [{
+                label: 'Number of Grades',
+                data: [{{ grade_below_40|default:0 }}, {{ grade_40_59|default:0 }}, {{ grade_60_79|default:0 }}, {{ grade_80_100|default:0 }}],
+                backgroundColor: '#567C8D',
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+            plugins: { legend: { position: 'top' } }
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %}

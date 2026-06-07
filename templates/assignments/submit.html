@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Submit Assignment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <i class="fas fa-upload"></i> Submit Assignment: {{ assignment.title }}
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h6>Course</h6>
+                    <p>{{ assignment.course.code }} - {{ assignment.course.name }}</p>
+                    <h6>Due Date</h6>
+                    <p>{{ assignment.due_date|date:"M d, Y H:i" }}</p>
+                    <h6>Description</h6>
+                    <p>{{ assignment.description }}</p>
+                    <h6>Total Marks</h6>
+                    <p>{{ assignment.total_marks }}</p>
+                </div>
+                <hr>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-file-alt"></i> Upload File (PDF, DOC, TXT)</label>
+                        {{ form.file }}
+                    </div>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                        <i class="fas fa-paper-plane"></i> Submit Assignment
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary rounded-pill px-4">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

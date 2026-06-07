@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit Submission{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <i class="fas fa-edit"></i> Edit Submission: {{ assignment.title }}
+            </div>
+            <div class="card-body">
+                <p>Current file: <a href="{{ submission.file.url }}" target="_blank" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-download"></i> View current submission</a>
+                </p>
+                <hr>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Replace file</label>
+                        {{ form.file }}
+                    </div>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Update Submission</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary rounded-pill px-4">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

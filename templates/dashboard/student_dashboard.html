@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome Row -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>Welcome, {{ student.user.get_full_name|default:student.user.username }}!</h2>
+        <p class="text-muted">Your academic journey at a glance</p>
+    </div>
+    <div>
+        <span class="badge bg-primary p-2 px-3 rounded-pill">Semester {{ student.semester }}</span>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <i class="fas fa-chart-line"></i>
+            <h3>{{ student.current_cgpa }}</h3>
+            <p>Current CGPA</p>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <i class="fas fa-book-open"></i>
+            <h3>{{ courses|length }}</h3>
+            <p>Enrolled Courses</p>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <i class="fas fa-tasks"></i>
+            <h3>{{ pending_assignments|length }}</h3>
+            <p>Pending Assignments</p>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <i class="fas fa-star"></i>
+            <h3>{{ recent_grades|length }}</h3>
+            <p>Recent Grades</p>
+        </div>
+    </div>
+</div>
+
+<!-- Academic Progress & Performance Status -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <i class="fas fa-chart-line"></i> Academic Progress (Semester CGPA)
+            </div>
+            <div class="card-body">
+                {% if semester_cgpa %}
+                    <ul class="list-group list-group-flush">
+                        {% for item in semester_cgpa %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Semester {{ item.semester }}
+                                <span class="badge bg-primary rounded-pill">{{ item.cgpa }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No grade data available yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <i class="fas fa-clipboard-list"></i> Performance Status
+            </div>
+            <div class="card-body text-center">
+                <h3 class="text-{{ status_color }}">{{ performance_status }}</h3>
+                <p>Current CGPA: <strong>{{ student.current_cgpa }}</strong> / 10.0</p>
+                <!-- Removed progress bar that used 'multiply' filter -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recommendations -->
+<div class="dashboard-card mb-4">
+    <div class="card-header">
+        <i class="fas fa-lightbulb"></i> Recommendations
+    </div>
+    <div class="card-body">
+        <ul class="list-unstyled mb-0">
+            {% for rec in recommendations %}
+                <li><i class="fas fa-chevron-right text-primary me-2"></i> {{ rec }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- My Courses -->
+<div class="dashboard-card mb-4">
+    <div class="card-header">
+        <i class="fas fa-book"></i> My Courses
+    </div>
+    <div class="card-body">
+        {% if courses %}
+            <div class="row">
+                {% for course in courses %}
+                    <div class="col-md-4 mb-3">
+                        <div class="course-card">
+                            <div class="course-code">{{ course.code }}</div>
+                            <div class="course-name">{{ course.name }}</div>
+                            <span class="course-semester">Sem {{ course.semester }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">Not enrolled in any course.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Pending Assignments -->
+<div class="dashboard-card mb-4">
+    <div class="card-header">
+        <i class="fas fa-clock"></i> Pending Assignments
+    </div>
+    <div class="card-body">
+        {% if pending_assignments %}
+            {% for assignment in pending_assignments %}
+                <div class="assignment-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="assignment-title">{{ assignment.title }}</div>
+                        <div class="assignment-meta">{{ assignment.course.code }} • Due: {{ assignment.due_date|date:"M d, Y H:i" }}</div>
+                    </div>
+                    <a href="{% url 'submit_assignment' assignment.id %}" class="btn btn-submit">Submit</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No pending assignments. Great job!</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Submitted Assignments -->
+<div class="dashboard-card mb-4">
+    <div class="card-header">
+        <i class="fas fa-check-circle"></i> Submitted Assignments
+    </div>
+    <div class="card-body">
+        {% with submissions=student.submissions.all %}
+            {% if submissions %}
+                <table class="table-dashboard w-100">
+                    <thead>
+                        <tr><th>Assignment</th><th>Course</th><th>Submitted</th><th>Marks</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in submissions %}
+                            <tr>
+                                <td>{{ sub.assignment.title }}</td>
+                                <td>{{ sub.assignment.course.code }}</td>
+                                <td>{{ sub.submitted_at|date:"M d, Y" }}</td>
+                                <td>{% if sub.marks_obtained %}<span class="badge-grade">{{ sub.marks_obtained }}/{{ sub.assignment.total_marks }}</span>{% else %}<span class="badge-grade">Pending</span>{% endif %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="text-muted">No submissions yet.</p>
+            {% endif %}
+        {% endwith %}
+    </div>
+</div>
+
+<!-- Recent Grades -->
+<div class="dashboard-card mb-4">
+    <div class="card-header">
+        <i class="fas fa-chart-line"></i> Recent Grades
+    </div>
+    <div class="card-body">
+        {% if recent_grades %}
+            <table class="table-dashboard w-100">
+                <thead><tr><th>Course</th><th>Exam</th><th>Marks</th><th>Performance</th></tr></thead>
+                <tbody>
+                    {% for grade in recent_grades %}
+                        <tr>
+                            <td>{{ grade.course.code }}</td>
+                            <td>{{ grade.get_exam_type_display }}</td>
+                            <td>{{ grade.marks_obtained }}/{{ grade.maximum_marks }}</td>
+                            <td>
+                                <div class="progress progress-grade">
+                                    <div class="progress-bar" style="width: {{ grade.percentage }}%;"></div>
+                                </div>
+                                <small>{{ grade.percentage|floatformat:1 }}%</small>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-muted">No grades recorded yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
