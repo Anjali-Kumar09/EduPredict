@@ -83,6 +83,32 @@
     </div>
 </div>
 
+<!---prediction card--->
+<!-- AI Prediction Card -->
+{% if prediction %}
+<div class="dashboard-card mb-4">
+    <div class="card-header bg-info text-white">
+        <i class="fas fa-chart-line"></i> AI Performance Prediction
+    </div>
+    <div class="card-body">
+        <h4>Predicted CGPA: {{ prediction.predicted_cgpa }}</h4>
+        <p>Risk Level:
+            <span class="badge {% if prediction.risk_level == 'Low' %}bg-success{% elif prediction.risk_level == 'Medium' %}bg-warning{% else %}bg-danger{% endif %}">
+                {{ prediction.risk_level }}
+            </span>
+        </p>
+        <p class="text-muted">Confidence: {{ prediction.confidence }}%</p>
+        <hr>
+        <h6>Recommendations:</h6>
+        <ul>
+            <li>{% if prediction.risk_level == 'High' %}⚠️ Meet your academic advisor immediately.{% else %}✅ Keep up your current study habits.{% endif %}</li>
+            <li>📚 Focus on subjects where you scored below 60%.</li>
+            <li>📅 Maintain attendance above 80%.</li>
+        </ul>
+    </div>
+</div>
+{% endif %}
+
 <!-- Recommendations -->
 <div class="dashboard-card mb-4">
     <div class="card-header">

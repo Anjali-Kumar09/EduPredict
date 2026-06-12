@@ -38,14 +38,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    'apps.accounts',  
-     'apps.academics',
-    'apps.students', 
+    'apps.accounts',
+    'apps.academics',
+    'apps.students',
     'apps.assignments',
     'apps.grades',
     'apps.dashboard',
     'apps.reports',
-    
+    'apps.ml_model', 
+    'apps.attendance',
 ]
 AUTH_USER_MODEL = 'accounts.User'
 

@@ -2,12 +2,35 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib import messages
-from django.db import models
 from django.db.models import Avg
+from datetime import timedelta
 from apps.academics.models import Enrollment, Course
 from apps.assignments.models import Assignment, Submission
 from apps.grades.models import Grade
 from apps.students.models import Student
+from apps.ml_model.predictor import predictor
+
+# ---------- Helper functions ----------
+def get_attendance_percentage(student, days=30):
+    """Calculate attendance % for last `days` days (default 30)."""
+    cutoff = timezone.now() - timedelta(days=days)
+    records = student.attendances.filter(date__gte=cutoff)
+    total = records.count()
+    if total == 0:
+        return 100.0          # default if no attendance records
+    present = records.filter(status=True).count()
+    return (present / total) * 100
+
+def get_submission_rate(student, courses):
+    """Calculate % of assignments submitted by student in given courses."""
+    from apps.assignments.models import Assignment, Submission
+    all_assignments = Assignment.objects.filter(course__in=courses)
+    total = all_assignments.count()
+    if total == 0:
+        return 0.0
+    submitted = Submission.objects.filter(student=student, assignment__in=all_assignments).count()
+    return (submitted / total) * 100
+# -------------------------------------
 
 @login_required
 def dashboard(request):
@@ -58,11 +81,29 @@ def dashboard(request):
             recommendations.append(f"📝 You have {pending_assignments.count()} pending assignment(s). Submit them soon.")
         if cgpa < 5.0:
             recommendations.append("⚠️ Your CGPA is low. Contact your academic advisor.")
-        # Attendance model not yet implemented – skip
-        # if hasattr(student, 'attendance_set') and not student.attendance_set.filter(status=True).exists():
-        #     recommendations.append("📅 No attendance records found. Make sure you attend classes regularly.")
         if not recommendations:
             recommendations = ["✅ Keep up the good work! Maintain your study routine."]
+
+        # ---------- ML PREDICTION with REAL data ----------
+        income_map = {'low':0, 'medium':1, 'high':2, 'very_high':3}
+        try:
+            attendance_pct = get_attendance_percentage(student)
+            submission_rate = get_submission_rate(student, courses)
+            features = {
+                'previous_cgpa': student.current_cgpa,
+                'attendance': attendance_pct,
+                'assignment_submission_rate': submission_rate,
+                'study_hours_per_day': getattr(student, 'study_hours_per_day', 4.0),   # default if field missing
+                'backlogs': student.backlog_count,
+                'family_income': income_map.get(student.family_income, 1),
+                'high_school_percentage': student.high_school_percentage,
+                'entrance_score': student.entrance_exam_score or 100,
+            }
+            pred_result = predictor.predict(features)
+        except Exception as e:
+            pred_result = None
+            print(f"Prediction error for student {student.id}: {e}")
+        # -------------------------------------------------
 
         context = {
             'student': student,
@@ -73,25 +114,21 @@ def dashboard(request):
             'performance_status': performance_status,
             'status_color': status_color,
             'recommendations': recommendations,
+            'prediction': pred_result,
         }
         return render(request, 'dashboard/student_dashboard.html', context)
 
     elif role == 'teacher':
         courses = Course.objects.filter(teacher=user)
-
-        # At‑Risk Students (CGPA < 5.0) – backlog_count does not exist
         at_risk_students = Student.objects.filter(
             enrollment__course__in=courses,
             enrollment__status='active',
             current_cgpa__lt=5.0
         ).distinct()
-
-        # Pending Grading Count
         pending_grading_count = Submission.objects.filter(
             assignment__course__in=courses,
             marks_obtained__isnull=True
         ).count()
-
         recent_submissions = Submission.objects.filter(
             assignment__course__in=courses
         ).select_related('assignment', 'student').order_by('-submitted_at')[:10]

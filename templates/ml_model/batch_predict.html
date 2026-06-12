@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Batch Prediction{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <i class="fas fa-upload"></i> Batch Prediction (CSV)
+            </div>
+            <div class="card-body">
+                <p>Upload a CSV file with the following columns:</p>
+                <ul>
+                    <li>previous_cgpa</li>
+                    <li>attendance</li>
+                    <li>assignment_submission_rate</li>
+                    <li>study_hours_per_day</li>
+                    <li>backlogs</li>
+                    <li>family_income (0=low,1=medium,2=high,3=very_high)</li>
+                    <li>high_school_percentage</li>
+                    <li>entrance_score</li>
+                </ul>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <input type="file" name="csv_file" accept=".csv" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload & Predict</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

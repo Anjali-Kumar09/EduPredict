@@ -232,3 +232,28 @@ body {
     background: #567C8D;
     border-radius: 8px;
 }
+
+/* Batch Prediction Button – EduPredict theme */
+.btn-batch {
+    background: #567C8D;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 24px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+.btn-batch:hover {
+    background: #2F4156;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.btn-batch i {
+    font-size: 1rem;
+}
