@@ -7,7 +7,11 @@ class SubmissionForm(forms.ModelForm):
         model = Submission
         fields = ['file']
         widgets = {
-            'file': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx,.txt'})
+            'file': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': '.pdf,.doc,.docx,.txt',
+                'required': True   # forces browser to require a file
+            })
         }
 
 class AssignmentForm(forms.ModelForm):

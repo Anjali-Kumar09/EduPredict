@@ -13,7 +13,6 @@ urlpatterns = [
     path('reports/', include('apps.reports.urls')),
     path('analytics/', include('apps.dashboard.analytics_urls')),
     path('api/ml/', include('apps.ml_model.urls')),
-    path('api/ml/', include('apps.ml_model.urls')),
     
     # Password reset URLs
     path('password-reset/',

@@ -14,7 +14,13 @@
                 <p><strong>Student:</strong> {{ student.user.get_full_name }} ({{ student.roll_number }})</p>
                 <p><strong>Submitted on:</strong> {{ submission.submitted_at|date:"M d, Y H:i" }}</p>
                 <p><strong>Late submission:</strong> {{ submission.is_late|yesno:"Yes,No" }}</p>
-                <p><strong>File:</strong> <a href="{{ submission.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Download</a></p>
+                <p><strong>File:</strong>
+                     {% if submission.file %}
+                  <a href="{{ submission.file.url }}" target="_blank">Download</a>
+                     {% else %}
+                  <span class="text-muted">No file uploaded</span>
+                     {% endif %}
+                </p>
                 <hr>
                 <form method="post">
                     {% csrf_token %}

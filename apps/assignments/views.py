@@ -7,11 +7,11 @@ from .forms import SubmissionForm, AssignmentForm
 from apps.students.models import Student
 from apps.academics.models import Course
 
-# ==================== STUDENT SUBMISSION ====================
+# ==================== STUDENT SUBMISSION (UPDATED WITH FILE CHECK) ====================
 @login_required
 def submit_assignment(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)
-    
+
     if request.user.role != 'student':
         messages.error(request, "Only students can submit assignments.")
         return redirect('dashboard')
@@ -32,6 +32,12 @@ def submit_assignment(request, assignment_id):
         return redirect('edit_submission', submission_id=existing.id)
     
     if request.method == 'POST':
+        # ----- SERVER‑SIDE FILE VALIDATION -----
+        if request.FILES.get('file') is None:
+            messages.error(request, "Please select a file to upload.")
+            form = SubmissionForm()
+            return render(request, 'assignments/submit.html', {'assignment': assignment, 'form': form})
+        
         form = SubmissionForm(request.POST, request.FILES)
         if form.is_valid():
             submission = form.save(commit=False)
