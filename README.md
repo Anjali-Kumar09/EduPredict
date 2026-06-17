@@ -1,62 +1,52 @@
 # 🎓 EduPredict – Student Performance Prediction System
 
-[![Django Version](https://img.shields.io/badge/Django-5.0.6-green)](https://www.djangoproject.com/)
-[![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
+EduPredict is a comprehensive academic management and student performance analytics platform designed to help educational institutions make data-driven decisions. The system combines traditional academic management features with machine learning to identify students who may need additional support and predict future academic performance.
 
-**EduPredict** is a full‑stack web application that helps colleges predict student performance using machine learning.  
-It gives teachers an early‑warning system and lets students see their predicted CGPA – all in one clean, role‑based platform.
+Built using Django and modern web technologies, EduPredict provides dedicated dashboards for administrators, teachers, and students, enabling seamless management of courses, assignments, grades, and academic records. The platform not only streamlines day-to-day academic operations but also offers valuable insights through interactive analytics, automated reporting, and performance prediction models.
 
----
+The core objective of EduPredict is to assist educators in detecting potential academic risks early, allowing timely intervention and improving overall student success rates. By leveraging attendance records, assignment submissions, and academic performance data, the system generates meaningful predictions and personalized recommendations for students.
 
-## ✨ What the system can do
+## ✨ Key Features
 
-- **Three roles** – Admin, Teacher, Student (each with their own dashboard)
-- **Course & assignment management** – teachers create assignments, students submit work, teachers grade online
-- **Smart reports** – generate PDF student reports and export class performance to Excel
-- **Live analytics** – risk distribution pie chart, students‑by‑semester bar chart (admin only)
-- **AI‑powered CGPA prediction** – uses a Random Forest model to predict future CGPA based on:
-  - Previous CGPA
-  - Real attendance % (last 30 days)
-  - Assignment submission rate
-  - Study hours, backlogs, family income, high school %, entrance score
-- **Batch prediction** – upload a CSV file with student data, get back a CSV with predicted CGPA for every row
-- **Clean, responsive design** – cream colour theme, works on desktop and mobile
+### 👥 Role-Based Access Control
 
----
+* **Administrator Dashboard** – Manage users, departments, courses, and monitor institution-wide analytics.
+* **Teacher Dashboard** – Create and manage courses, upload assignments, evaluate submissions, generate reports, and identify at-risk students.
+* **Student Dashboard** – Enroll in courses, submit assignments, track grades, and receive personalized academic insights.
 
-## 🤖 Machine Learning – How it works (no math, just the idea)
+### 📊 Analytics & Reporting
 
-We trained a **Random Forest Regressor** on 2000 synthetic student records.  
-The model learns which features (attendance, previous marks, study hours, etc.) matter most for final CGPA.
+* Interactive dashboards with performance visualizations.
+* Student risk distribution and semester-wise performance analytics.
+* Downloadable PDF performance reports.
+* Excel export functionality for academic records and class reports.
 
-- **Single prediction** – teacher picks a student from a dropdown, clicks “Predict CGPA”, and instantly sees predicted CGPA, risk level (Low/Medium/High), and confidence score.
-- **Batch prediction** – teacher uploads a CSV containing the 8 input features, the system processes every row and returns a new CSV with an extra `predicted_cgpa` column.
+### 🤖 Machine Learning Integration
 
-Confidence may be low when there aren’t enough real attendance/submission records – that’s normal. With more data, confidence rises.
+* Predict student CGPA using a trained Random Forest Regression model.
+* Risk classification based on predicted performance.
+* Confidence scoring for prediction results.
+* Batch prediction support through CSV uploads.
+* Real-time calculation of attendance percentage and assignment submission rates.
 
----
+### 🔐 Security & User Experience
 
-## 🛠️ Tech stack (what I used)
+* Custom authentication system with multiple user roles.
+* Secure password reset functionality.
+* Responsive and user-friendly interface built with Bootstrap 5.
+* Modern dashboard design optimized for desktop and mobile devices.
 
-| Layer | Technology |
-|-------|------------|
-| Backend | Python 3.12, Django 5.0 |
-| Frontend | HTML,Css, Bootstrap 5, Chart.js, Font Awesome |
-| Database | SQLite (development) / PostgreSQL (production ready) |
-| Machine Learning | scikit‑learn (Random Forest), pandas, numpy, joblib |
-| Reports | ReportLab (PDF), openpyxl (Excel) |
+## 🛠️ Technology Stack
 
----
+| Layer            | Technologies                                        |
+| ---------------- | --------------------------------------------------- |
+| Backend          | Python 3.12, Django 5                               |
+| Frontend         | HTML5, CSS3, Bootstrap 5, JavaScript, Chart.js      |
+| Database         | SQLite (Development), PostgreSQL (Production Ready) |
+| Machine Learning | Scikit-learn (Random Forest Regressor)              |
+| Reporting        | ReportLab, OpenPyXL                                 |
+| Authentication   | Custom Django User Model                            |
 
-## How to run the project (for someone who clones it)
+## 🎯 Project Goal
 
-```bash
-git clone https://github.com/Anjali-Kumar09/EduPredict.git
-cd EduPredict
-python -m venv venv
-venv\Scripts\activate          # Windows
-# source venv/bin/activate     # Mac/Linux
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
+The primary goal of EduPredict is to bridge the gap between academic data and actionable insights. Instead of identifying struggling students after final examinations, educators can proactively monitor performance trends, predict outcomes, and provide timely support that enhances student learning and success.

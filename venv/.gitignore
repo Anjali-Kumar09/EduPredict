@@ -29,3 +29,7 @@ staticfiles/
 # OS
 .DS_Store
 Thumbs.db
+
+# Render deployment files (optional)
+*.yaml
+*.sh
